@@ -67,8 +67,8 @@ const sourceData = requestData.value;
 
 // Filter closed
 let data = sourceData.filter(course => course.status !== 'Closed');
-data = data.filter(course => course.school.includes("Universiteit"));
-// data = data.filter(course => course.timeType !== 'Voltijd');
+// data = data.filter(course => course.school.includes("Universiteit"));
+data = data.filter(course => course.timeType !== 'Voltijd');
 
 const likedCourses = ref([])
 let dislikedCourses = []
