@@ -24,9 +24,8 @@ jobs:
     steps:
       - name: Trigger deploy
         uses: actions/github-script@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
         with:
+          github-token: ${{ secrets.DEPLOY_TOKEN }}
           script: |
             await github.rest.actions.createWorkflowDispatch({
               owner: 'ExploHash',
