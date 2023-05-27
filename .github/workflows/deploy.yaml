@@ -19,10 +19,13 @@ jobs:
           docker login registry.nykaworks.com -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker push registry.nykaworks.com/module-swiper-pwa:${{ github.sha }}
   Deploy:
+    needs: Build
     runs-on: ubuntu-latest
     steps:
       - name: Trigger deploy
         uses: actions/github-script@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
