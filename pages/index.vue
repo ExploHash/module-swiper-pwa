@@ -205,6 +205,12 @@ const restoreFromLocalStoreage = () => {
   }
 }
 
+const removeLikedCourse = (course) => {
+  likedCourses.value = likedCourses.value.filter(likedCourse => likedCourse._id !== course._id);
+  saveToLocalStoreage();
+  coursesLeftUpdate();
+}
+
 // Restore from local storage
 restoreFromLocalStoreage();
 if (data.length > 0){
