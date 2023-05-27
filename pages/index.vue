@@ -1,5 +1,5 @@
 <template>
-  <el-card :body-style="{ padding: '20px' }">
+  <el-card v-if="course" :body-style="{ padding: '20px' }">
     <h1>Swiper {{ coursesLeft }} courses left</h1>
     <h3>{{ course.name }}</h3>
     <p>{{ course.description }}</p>
@@ -8,7 +8,7 @@
         <el-button type="primary" icon="el-icon-link">Go to course</el-button>
       </a>
       <el-button type="success" icon="el-icon-like" @click="like">Like</el-button>
-      <el-button type="success" icon="el-icon-like" @click="likeTags">Like tags</el-button>
+      <!-- <el-button type="success" icon="el-icon-like" @click="likeTags">Like tags</el-button> -->
       <el-button type="danger" icon="el-icon-dislike" @click="dislike">Dislike</el-button>
     </div>
     <p><b>EC Points:</b> {{ course.ecPoints }}</p>
@@ -28,7 +28,7 @@
           <p><b>From:</b> {{ formatDate(slot.from) }}</p>
           <p><b>To:</b> {{ formatDate(slot.to) }}</p>
           <p><b>Status:</b> {{ slot.status }}</p>
-          <p v-if="slot.status === 'PreOpening'"><b>Enrollment Start:</b> {{ formatDate(slot.enrollStart) }}</p>
+          <!-- <p v-if="slot.status === 'PreOpening'"><b>Enrollment Start:</b> {{ formatDate(slot.enrollStart) }}</p> -->
         </li>
       </ul>
     </div>
@@ -42,21 +42,23 @@
       </ul>
     </div>
   </el-card>
-  <el-card>
-    <h1>Liked Courses</h1>
-    <ul>
-      <li v-for="course in likedCourses" :key="course.id">
-        <p>{{ course.name }}</p>
-      </li>
-    </ul>
+  <el-card v-else>
+    <h1>Swiper</h1>
+    <p>No courses left</p>
   </el-card>
-  <el-card>
-    <h1>30 Most liked tags with likes</h1>
-    <ul>
-      <li v-for="tag in Object.keys(tags).sort((a, b) => tags[b] - tags[a]).slice(0, 30)" :key="tag">
-        <p>{{ tag }}: {{ tags[tag] }}, Matching courses left: {{ coursesLeftWithTags(tag) }}</p>
-      </li>
-    </ul>
+  <h1>Liked Courses</h1>
+  <el-card v-for="course in likedCourses" :key="course.id">
+    <h3>{{ course.name }}</h3>
+    <p>{{ course.description }}</p>
+    <p><b>School:</b> {{ course.school }}</p>
+    <p><b>EC Points:</b> {{ course.ecPoints }}</p>
+    <p><b>Time Type:</b> {{ course.timeType }}</p>
+    <div class="button-group">
+      <a :href="course.url" target="_blank" rel="noopener noreferrer">
+        <el-button type="primary" icon="el-icon-link">Go to course</el-button>
+      </a>
+      <el-button type="danger" icon="el-icon-delete" @click="removeLikedCourse(course)">Remove</el-button>
+    </div>
   </el-card>
 </template>
 
@@ -92,8 +94,8 @@ const like = () => {
   })
 
   generateNewCourse();
-  console.log(course.value);
   saveToLocalStoreage();
+  coursesLeftUpdate();
 }
 
 const likeTags = (tags) => {
@@ -150,17 +152,19 @@ const calculateTagScore = (tags, wantedTags) => {
   return score;
 }
 
+const coursesLeft = ref(0);
 // Computed courses left
-const coursesLeft = computed(() => {
-  return data.filter(course => !likedCourses.value.some(likedCourse => likedCourse._id === course._id))
+const coursesLeftUpdate = () => {
+  coursesLeft.value = data.filter(course => !likedCourses.value.some(likedCourse => likedCourse._id === course._id))
     .filter(course => !dislikedCourses.some(dislikedCourse => dislikedCourse._id === course._id)).length;
-})
+}
 
 const dislike = () => {
   console.log("AAA",course.value);
   dislikedCourses.push(course.value);
   generateNewCourse();
   saveToLocalStoreage();
+  coursesLeftUpdate();
 }
 
 const coursesLeftWithTags = (tag) => {
@@ -203,7 +207,10 @@ const restoreFromLocalStoreage = () => {
 
 // Restore from local storage
 restoreFromLocalStoreage();
-generateNewCourse();
+if (data.length > 0){
+  generateNewCourse();
+  coursesLeftUpdate();
+}
 
 
 </script>
