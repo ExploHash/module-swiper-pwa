@@ -36,7 +36,7 @@ jobs:
               workflow_id: 'deploy-app.yaml',
               ref: 'main',
               inputs: {
-                appName: ${{ env.PROJECT_NAME }},
+                appName: '${{ env.PROJECT_NAME }}',
                 appTag: '${{ github.sha }}',
                 stackName: 'prod',
               }
