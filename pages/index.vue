@@ -53,6 +53,12 @@
     <p><b>School:</b> {{ course.school }}</p>
     <p><b>EC Points:</b> {{ course.ecPoints }}</p>
     <p><b>Time Type:</b> {{ course.timeType }}</p>
+    <!-- timeslots -->
+    <div>
+      <ul>
+        <li v-for="slot of course.slots" key="slot.from"> {{ formatDate(slot.from) }} - {{ formatDate(slot.to) }}: {{slot.status}}</li>
+      </ul>
+    </div>
     <div class="button-group">
       <a :href="course.url" target="_blank" rel="noopener noreferrer">
         <el-button type="primary" icon="el-icon-link">Go to course</el-button>
@@ -67,10 +73,25 @@
 const { data: requestData } = await useFetch('https://nykaworks-static.s3.eu-west-1.amazonaws.com/module-swiper-data.json');
 const sourceData = requestData.value;
 
+const formatDate = (date) => {
+  // Format date to human readable format
+  return new Date(date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
 // Filter closed
 let data = sourceData.filter(course => course.status !== 'Closed');
-// data = data.filter(course => course.school.includes("Universiteit"));
-data = data.filter(course => course.timeType !== 'Voltijd');
+// data = data.filter(course => !course.school.includes("Open Universiteit"));
+data = data.filter(course => course.niveau.includes("HBO"));
+// data = data.filter(course => !course.school.includes("Universiteit"));
+data = data.filter(course => course.timeType === "Deeltijd");
+// data = data.filter(course => course.ecPoints === 30);
+data = data.filter(course => course.slots.some(slot => formatDate(slot.from).includes("Sep") || formatDate(slot.from).includes("Aug")));
+
 
 const likedCourses = ref([])
 let dislikedCourses = []
@@ -171,15 +192,15 @@ const coursesLeftWithTags = (tag) => {
   return data.filter(course => course.aiTags.includes(tag)).length - likedCourses.value.filter(course => course.aiTags.includes(tag)).length - dislikedCourses.filter(course => course.aiTags.includes(tag)).length;
 }
 
-const formatDate = (date) => {
-  // Format date to human readable format
-  return new Date(date).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
+// const formatDate = (date) => {
+//   // Format date to human readable format
+//   return new Date(date).toLocaleDateString('en-US', {
+//     weekday: 'long',
+//     year: 'numeric',
+//     month: 'long',
+//     day: 'numeric',
+//   })
+// }
 
 const saveToLocalStoreage = () => {
   localStorage.setItem('likedCourses', JSON.stringify(likedCourses.value));
